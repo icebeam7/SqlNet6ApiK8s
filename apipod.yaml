@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: libraryapp
+  labels:
+    name: libraryapp
+spec:
+  containers:
+  - name: libraryapp
+    image: sqlnet6apik8s:latest
+    imagePullPolicy: Never
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 80

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: library-service
+spec:
+  selector:
+    app: libraryapp
+  ports:
+    - port: 80
+      targetPort: 80

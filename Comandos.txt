@@ -1,0 +1,51 @@
+minikube start
+kubectl config get-contexts
+kubectl get node
+minikube addons enable dashboard
+minikube dashboard
+
+# & minikube -p minikube docker-env --shell powershell | Invoke-Expression
+# Now any docker command you run in this current terminal will run against the docker inside minikube cluster
+
+docker build -t sqlnet6apik8s -f .\SqlNet6ApiK8s\Dockerfile .
+minikube cache add sqlnet6apik8s:latest
+# minikube image load sqlnet6apik8s:latest
+# imagePullPolicy: Never en YAML
+
+kubectl apply -f .\apipod.yaml
+kubectl get pod -o wide
+
+kubectl run -it --rm --restart=Never busybox --image=yauritux/busybox-curl sh
+curl http://172.17.0.5/api/books
+
+kubectl apply -f .\apideployment.yaml
+kubectl apply -f .\apiservice.yaml
+kubectl get deployment
+kubectl get pod
+kubectl delete pod libraryapp-deployment-7c9c5d5d7f-rxwld
+kubectl get pod
+# set replicas to 2, apply manifest, get pods again
+
+kubectl apply -f .\apiservice.yaml
+kubectl get service library-service
+kubectl run -it --rm --restart=Never busybox --image=yauritux/busybox-curl sh
+curl http://library-service/api/books
+curl http://library-service.default/api/books
+
+kubectl apply -f .\apiservicenp.yml
+kubectl get service library-servicenp --> get the port (32698)
+kubectl describe node --> find the ip, access ip+port
+minikube service library-servicenp --> for minikube
+http://127.0.0.1:56453/swagger/index.html
+
+minikube addons enable ingress
+minikube ip
+
+C:\Windows\System32\drivers\etc\hosts
+192.168.49.2 libraryapp-deployment.io
+
+kubectl apply -f .\apiserviceing.yml
+kubectl get service library-servicenp
+kubectl run -it --rm --restart=Never busybox --image=yauritux/busybox-curl sh
+http://192.168.49.2:32591/api/books
+curl http://libraryapp-deployment.io:32591/api/books
