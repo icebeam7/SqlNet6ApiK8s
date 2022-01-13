@@ -9,11 +9,39 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<LibraryContext>(options =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("LibraryConnectionSql") ;
+    var connectionString = builder.Configuration.GetConnectionString("LibraryConnectionSql");
     options.UseSqlServer(connectionString);
 });
 
+builder.Services.AddHealthChecks()
+    .AddCheck<RandomHealthCheck>("Random Check")
+    .AddSqlServer(
+        builder.Configuration.GetConnectionString("LibraryConnectionSql"), 
+        failureStatus: HealthStatus.Degraded,
+        healthQuery: "select 1")
+    .AddDbContextCheck<LibraryContext>();
+
+builder.Services.AddHealthChecksUI(options =>
+{
+    options.SetEvaluationTimeInSeconds(10);
+    options.MaximumHistoryEntriesPerEndpoint(60);
+    options.SetApiMaxActiveRequests(1);
+    options.AddHealthCheckEndpoint("Library API Health Check", "/health/ready");
+}).AddInMemoryStorage();
+
 var app = builder.Build();
+
+app.MapHealthChecks("/health/ready", new HealthCheckOptions()
+{
+    Predicate = _ => true,
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
+
+// /healthchecks-ui
+app.MapHealthChecksUI(options =>
+{
+    options.UIPath = "/health-ui";
+});
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())

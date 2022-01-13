@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booksapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: booksapi
+  template:
+    metadata:
+      labels:
+        app: booksapi
+    spec:
+      containers:
+      - name: app
+        image: sqlnet6apik8s:latest
+        imagePullPolicy: Never
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        - name: https
+          containerPort: 443
+          protocol: TCP
+        resources:
+          limits:
+            memory: "64Mi"
+            cpu: "250m"
+        startupProbe:
+          httpGet:
+            path: /health/startup
+            port: 80
+            scheme: HTTPS
+          failureThreshold: 30
+          periodSeconds: 10
+          initialDelaySeconds: 60
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 80
+            scheme: HTTPS
+          failureThreshold: 1
+          periodSeconds: 10
+          initialDelaySeconds: 60
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 80
+            scheme: HTTPS
+          failureThreshold: 1
+          periodSeconds: 10
+          initialDelaySeconds: 60
